@@ -8,8 +8,11 @@
       <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="Themes/Dark.xaml"/>
       </ResourceDictionary.MergedDictionaries>
-      <conv:StatusBgConverter x:Key="StatusBg"/>
-      <conv:StatusFgConverter x:Key="StatusFg"/>
+      <conv:StatusBgConverter       x:Key="StatusBg"/>
+      <conv:StatusFgConverter       x:Key="StatusFg"/>
+      <conv:IssueTypeColorConverter    x:Key="IssueTypeColor"/>
+      <conv:IssueTypeGeometryConverter x:Key="IssueTypeGeometry"/>
+      <conv:ChevronGeometryConverter   x:Key="ChevronGeometry"/>
     </ResourceDictionary>
   </Application.Resources>
 </Application>

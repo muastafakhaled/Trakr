@@ -147,9 +147,12 @@ public partial class SessionProposalWindow : Window
         StartBtn.IsEnabled = IssueList.SelectedItem != null;
     }
 
-    private void Start_Click(object sender, RoutedEventArgs e)
+    private async void Start_Click(object sender, RoutedEventArgs e)
     {
         if (IssueList.SelectedItem is not JiraIssue issue) return;
+
+        StartBtn.IsEnabled  = false;
+        StartBtn.Content    = "Starting…";
 
         string? repoPath = null, branch = null;
         try
@@ -159,6 +162,10 @@ public partial class SessionProposalWindow : Window
             if (match != null) { repoPath = match.RepoPath; branch = match.Branch; }
         }
         catch { }
+
+        // Transition to In Progress if checkbox is checked
+        if (SetInProgressCheck.IsChecked == true)
+            await Task.Run(() => _jira.TransitionToInProgressAsync(issue.Key));
 
         _tracker.StartFromIssue(issue, repoPath, branch);
         Close();

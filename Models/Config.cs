@@ -47,6 +47,13 @@ public class TrackerSettings
     [JsonPropertyName("auto_update")]
     public bool AutoUpdate { get; set; } = false;
 
+    [JsonPropertyName("group_subtasks")]
+    public bool GroupSubtasks { get; set; } = true;
+
+    /// <summary>"Default" or "Jira"</summary>
+    [JsonPropertyName("theme")]
+    public string Theme { get; set; } = "Default";
+
     [JsonPropertyName("watched_processes")]
     public List<string> WatchedProcesses { get; set; } = new()
     {

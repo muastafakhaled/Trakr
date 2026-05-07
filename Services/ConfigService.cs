@@ -48,6 +48,5 @@ public class ConfigService
     public bool IsConfigured() =>
         !string.IsNullOrWhiteSpace(_config.Jira.Url)   &&
         !string.IsNullOrWhiteSpace(_config.Jira.Email) &&
-        !string.IsNullOrWhiteSpace(_config.Jira.Token) &&
-        _config.Repos.Count > 0;
+        !string.IsNullOrWhiteSpace(_config.Jira.Token);
 }

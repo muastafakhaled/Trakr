@@ -40,6 +40,9 @@ public partial class HomeWindow : Window
 
         InitializeComponent();
 
+        // Restore persisted toggle state
+        GroupSubtasksCheck.IsChecked = _config.Current.Settings.GroupSubtasks;
+
         _liveTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _liveTimer.Tick += (_, _) => RefreshTimer();
         _liveTimer.Start();
@@ -101,7 +104,7 @@ public partial class HomeWindow : Window
         TabIssues  .Foreground = _activeTab == Tab.Issues   ? active : inactive;
         TabLog     .Foreground = _activeTab == Tab.LiveLog  ? active : inactive;
 
-        IssueRefreshLabel.Visibility = _activeTab == Tab.Issues ? Visibility.Visible : Visibility.Collapsed;
+        IssueTabActions.Visibility = _activeTab == Tab.Issues ? Visibility.Visible : Visibility.Collapsed;
     }
 
     // ── Issues loading ────────────────────────────────────────────
@@ -126,7 +129,70 @@ public partial class HomeWindow : Window
             return;
         }
 
-        IssueList.ItemsSource = _allIssues;
+        ApplyIssueSource(_allIssues);
+    }
+
+    // Apply current grouping preference to the list
+    private void ApplyIssueSource(List<JiraIssue> issues)
+    {
+        IssueList.ItemsSource = ApplyGrouping(issues);
+    }
+
+    private List<JiraIssue> ApplyGrouping(List<JiraIssue> issues)
+    {
+        if (GroupSubtasksCheck.IsChecked == true)
+            return GroupIssues(issues);
+
+        // Flat mode — clear all grouping flags
+        foreach (var i in issues) { i.HasSubtasks = false; i.IsGrouped = false; }
+        return issues;
+    }
+
+    private void GroupSubtasks_Changed(object sender, RoutedEventArgs e)
+    {
+        _config.Current.Settings.GroupSubtasks = GroupSubtasksCheck.IsChecked == true;
+        _config.Save();
+        if (_allIssues.Count > 0) ApplyIssueSource(_allIssues);
+    }
+
+    // Chevron click — toggle parent expand/collapse
+    private void IssueExpandToggle_Click(object sender, RoutedEventArgs e)
+    {
+        e.Handled = true; // prevent ListBox selection
+        if (sender is System.Windows.Controls.Button btn && btn.Tag is string key)
+        {
+            var issue = _allIssues.FirstOrDefault(i => i.Key == key);
+            if (issue != null)
+            {
+                issue.IsExpanded = !issue.IsExpanded;
+                ApplyIssueSource(_allIssues);
+            }
+        }
+    }
+
+    // Group issues: parents first, subtasks immediately after their parent (collapsed if !IsExpanded)
+    private static List<JiraIssue> GroupIssues(List<JiraIssue> issues)
+    {
+        var parents  = issues.Where(i => !i.IsSubTask).ToList();
+        var subtasks = issues.Where(i =>  i.IsSubTask).ToList();
+        var result   = new List<JiraIssue>();
+        foreach (var parent in parents)
+        {
+            var children = subtasks.Where(s => s.ParentKey == parent.Key).ToList();
+            parent.HasSubtasks = children.Count > 0;
+            parent.IsGrouped   = false; // parents are never indented
+            result.Add(parent);
+            if (parent.IsExpanded)
+            {
+                foreach (var c in children) c.IsGrouped = true;
+                result.AddRange(children);
+            }
+        }
+        // Orphan subtasks — parent not in list, show flat (no indent, no parent label)
+        var orphans = subtasks.Where(s => !parents.Any(p => p.Key == s.ParentKey));
+        foreach (var o in orphans) { o.HasSubtasks = false; o.IsGrouped = false; }
+        result.AddRange(orphans);
+        return result;
     }
 
     private void IssueSearch_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
@@ -134,7 +200,7 @@ public partial class HomeWindow : Window
         var q = IssueSearchBox.Text.Trim();
         if (string.IsNullOrEmpty(q))
         {
-            IssueList.ItemsSource   = _allIssues;
+            ApplyIssueSource(_allIssues);
             IssueEmptyText.Visibility = _allIssues.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
             return;
         }
@@ -143,7 +209,7 @@ public partial class HomeWindow : Window
             i.Key    .Contains(q, StringComparison.OrdinalIgnoreCase) ||
             i.Summary.Contains(q, StringComparison.OrdinalIgnoreCase));
 
-        IssueList.ItemsSource   = local.Count > 0 ? local : null;
+        IssueList.ItemsSource     = local.Count > 0 ? ApplyGrouping(local) : null;
         IssueEmptyText.Visibility = local.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         if (local.Count == 0) IssueEmptyText.Text = $"No issues matching \"{q}\".";
     }
@@ -158,9 +224,16 @@ public partial class HomeWindow : Window
         await LoadIssuesAsync(forceRefresh: true);
     }
 
-    private void IssueStart_Click(object sender, RoutedEventArgs e)
+    private async void IssueStart_Click(object sender, RoutedEventArgs e)
     {
         if (IssueList.SelectedItem is not JiraIssue issue) return;
+
+        IssueStartBtn.IsEnabled = false;
+        IssueStartBtn.Content   = "Starting...";
+
+        if (SetInProgressCheck.IsChecked == true)
+            await Task.Run(() => _jira.TransitionToInProgressAsync(issue.Key));
+
         _tracker.StartFromIssue(issue, null, null);
         SwitchTab(Tab.Sessions);
         Refresh();

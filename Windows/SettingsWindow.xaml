@@ -152,6 +152,19 @@
         <TextBlock Text="When enabled, the app silently downloads updates in the background and prompts you to restart."
                    Foreground="{StaticResource SubtextBrush}" FontSize="11"
                    TextWrapping="Wrap" Margin="22,4,0,0"/>
+
+        <!-- Theme selector -->
+        <TextBlock Text="APPEARANCE" Foreground="{StaticResource SubtextBrush}"
+                   FontSize="11" FontWeight="SemiBold" Margin="0,18,0,10"/>
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+          <TextBlock Text="Theme" Foreground="{StaticResource TextBrush}" FontSize="13"
+                     VerticalAlignment="Center" Margin="0,0,14,0"/>
+          <ComboBox x:Name="ThemeCombo" Style="{StaticResource DarkCombo}"
+                    Width="160" SelectionChanged="ThemeCombo_SelectionChanged">
+            <ComboBoxItem Content="Default" Tag="Default"/>
+            <ComboBoxItem Content="Jira"    Tag="Jira"/>
+          </ComboBox>
+        </StackPanel>
       </StackPanel>
     </Border>
 

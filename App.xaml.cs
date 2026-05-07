@@ -44,6 +44,9 @@ public partial class App : Application
 
         var config  = new ConfigService();
 
+        // Apply saved theme before any window opens
+        ApplyTheme(config.Current.Settings.Theme);
+
         // Configure logger
         Log.LogFilePath = config.LogPath;
         Log.WriteToFile = config.Current.Settings.LogToFile;
@@ -132,6 +135,23 @@ public partial class App : Application
         {
             Log.Warning("App", $"Update check failed: {ex.Message}");
         }
+    }
+
+    /// <summary>Swaps the active theme ResourceDictionary at runtime.</summary>
+    public static void ApplyTheme(string themeName)
+    {
+        var uri = themeName == "Jira"
+            ? new Uri("Themes/Jira.xaml",    UriKind.Relative)
+            : new Uri("Themes/Dark.xaml",    UriKind.Relative);
+
+        var rd = Current.Resources.MergedDictionaries;
+        // Replace the first merged dictionary (the theme file)
+        if (rd.Count > 0) rd[0] = new ResourceDictionary { Source = uri };
+        else               rd.Add(new ResourceDictionary { Source = uri });
+
+        // Also update window backgrounds that are set directly
+        if (Current.MainWindow != null)
+            Current.MainWindow.Background = (System.Windows.Media.Brush)Current.Resources["BgBrush"];
     }
 
     public void OpenLogViewer()

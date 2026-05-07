@@ -15,6 +15,7 @@ public partial class SettingsWindow : Window
     private readonly JiraService   _jira;
     private readonly LogService?   _log;
     private List<string>           _processes = new();
+    private bool                   _loadingSettings;
 
     public SettingsWindow(ConfigService config, JiraService jira, LogService? log = null)
     {
@@ -37,6 +38,14 @@ public partial class SettingsWindow : Window
         ProcessList.ItemsSource = _processes.ToList();
         StartupCheck.IsChecked    = IsEnabled();
         AutoUpdateCheck.IsChecked = _config.Current.Settings.AutoUpdate;
+
+        // Select saved theme in the combo (suppress change event during load)
+        _loadingSettings = true;
+        var savedTheme = _config.Current.Settings.Theme;
+        foreach (System.Windows.Controls.ComboBoxItem item in ThemeCombo.Items)
+            if (item.Tag?.ToString() == savedTheme) { ThemeCombo.SelectedItem = item; break; }
+        if (ThemeCombo.SelectedItem == null) ThemeCombo.SelectedIndex = 0;
+        _loadingSettings = false;
         LogToFileCheck.IsChecked = _config.Current.Settings.LogToFile;
         LogPathLabel.Text        = _log?.LogFilePath ?? _config.LogPath;
         LogLevelCombo.SelectedIndex = _config.Current.Settings.LogLevel switch
@@ -131,6 +140,14 @@ public partial class SettingsWindow : Window
         var path = _log?.LogFilePath ?? _config.LogPath;
         if (!string.IsNullOrEmpty(path))
             try { Process.Start("explorer.exe", $"/select,\"{path}\""); } catch { }
+    }
+
+    private void ThemeCombo_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+    {
+        if (_loadingSettings) return;
+        var theme = (ThemeCombo.SelectedItem as System.Windows.Controls.ComboBoxItem)?.Tag?.ToString() ?? "Default";
+        _config.Current.Settings.Theme = theme;
+        App.ApplyTheme(theme);
     }
 
     private void Cancel_Click(object s, RoutedEventArgs e) => Close();

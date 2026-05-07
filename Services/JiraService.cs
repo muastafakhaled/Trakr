@@ -57,7 +57,7 @@ public class JiraService
             {
                 jql        = jqlRaw,
                 maxResults = 50,
-                fields     = new[] { "summary", "status", "issuetype", "project" }
+                fields     = new[] { "summary", "status", "issuetype", "project", "parent" }
             });
 
             _log?.Debug("Jira", $"Fetching issues — JQL: {jqlRaw}");
@@ -86,7 +86,8 @@ public class JiraService
                         Summary   = GetString(fields, "summary"),
                         Project   = GetNestedString(fields, "project",   "name"),
                         Status    = GetNestedString(fields, "status",    "name"),
-                        IssueType = GetNestedString(fields, "issuetype", "name")
+                        IssueType = GetNestedString(fields, "issuetype", "name"),
+                        ParentKey = GetNestedString(fields, "parent",    "key")
                     });
                 }
                 catch (Exception ex) { _log?.Warning("Jira", $"Skipped malformed issue: {ex.Message}"); }
@@ -223,6 +224,61 @@ public class JiraService
         if (el.TryGetProperty(prop, out var outer) && outer.ValueKind == JsonValueKind.Object)
             return GetString(outer, nestedProp);
         return "";
+    }
+
+    // ── Transition issue to "In Progress" ────────────────────────
+    public async Task<bool> TransitionToInProgressAsync(string issueKey)
+    {
+        try
+        {
+            SetAuth();
+            var cfg = _config.Current.Jira;
+
+            // 1. Get available transitions
+            var transUrl  = $"{cfg.Url.TrimEnd('/')}/rest/api/3/issue/{issueKey}/transitions";
+            var transResp = await _http.GetAsync(transUrl);
+            if (!transResp.IsSuccessStatusCode) return false;
+
+            var transJson = await transResp.Content.ReadAsStringAsync();
+            using var transDoc = JsonDocument.Parse(transJson);
+
+            string? transitionId = null;
+            foreach (var t in transDoc.RootElement.GetProperty("transitions").EnumerateArray())
+            {
+                var toName = GetNestedString(t, "to", "name").ToLower();
+                if (toName.Contains("progress"))
+                {
+                    transitionId = GetString(t, "id");
+                    break;
+                }
+            }
+
+            if (transitionId == null)
+            {
+                _log?.Warning("Jira", $"No 'In Progress' transition found for {issueKey}");
+                return false;
+            }
+
+            // 2. Apply the transition
+            var body = JsonSerializer.Serialize(new
+            {
+                transition = new { id = transitionId }
+            });
+            var resp = await _http.PostAsync(transUrl,
+                new StringContent(body, Encoding.UTF8, "application/json"));
+
+            if (resp.IsSuccessStatusCode)
+                _log?.Info("Jira", $"Transitioned {issueKey} to In Progress");
+            else
+                _log?.Warning("Jira", $"Transition failed for {issueKey}: {(int)resp.StatusCode}");
+
+            return resp.IsSuccessStatusCode;
+        }
+        catch (Exception ex)
+        {
+            _log?.Error("Jira", $"TransitionToInProgressAsync exception", ex);
+            return false;
+        }
     }
 
     // ── Test connection ───────────────────────────────────────────
