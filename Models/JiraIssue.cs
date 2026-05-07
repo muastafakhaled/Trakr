@@ -73,9 +73,9 @@ public class JiraIssue
         _                                                          => "#21262d"
     };
 
-    public string IssueTypeColor => IsSubTask ? "#8b949e" : IssueType.ToLower() switch
+    public string IssueTypeColor => IsSubTask ? "#579dff" : IssueType.ToLower() switch
     {
-        var t when t.Contains("sub")                               => "#8b949e",   // gray (fallback)
+        var t when t.Contains("sub")                               => "#579dff",   // blue (fallback)
         var t when t.Contains("bug")                               => "#f85149",   // red
         var t when t.Contains("epic")                              => "#c084fc",   // purple
         var t when t.Contains("story")                             => "#3fb950",   // green

@@ -282,7 +282,8 @@
                        Visibility="Collapsed"/>
             <ListBox x:Name="IssueList" Style="{StaticResource DarkList}"
                      BorderThickness="0" Background="Transparent"
-                     SelectionChanged="IssueList_SelectionChanged">
+                     SelectionChanged="IssueList_SelectionChanged"
+                     MouseDoubleClick="IssueList_DoubleClick">
               <ListBox.ItemTemplate>
                 <DataTemplate>
                   <Grid>

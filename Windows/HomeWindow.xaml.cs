@@ -339,6 +339,14 @@ public partial class HomeWindow : Window
     }
 
     // ── Event handlers ────────────────────────────────────────────
+    private void IssueList_DoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if (IssueList.SelectedItem is not JiraIssue issue) return;
+        var url = _config.Current.Jira.Url.TrimEnd('/') + "/browse/" + issue.Key;
+        try { Process.Start(new ProcessStartInfo(url) { UseShellExecute = true }); }
+        catch { }
+    }
+
     private void RecentList_DoubleClick(object sender, MouseButtonEventArgs e)
     {
         if (RecentList.SelectedItem is not SessionRow row) return;
