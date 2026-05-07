@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <AssemblyName>Trakr</AssemblyName>
+    <RootNamespace>JiraTimeTracker</RootNamespace>
+    <ApplicationIcon>Resources\tray.ico</ApplicationIcon>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Version>1.0.0</Version>
+    <!-- Velopack requires a custom Main() -->
+    <StartupObject>JiraTimeTracker.Program</StartupObject>
+  </PropertyGroup>
+  <ItemGroup>
+    <Resource Include="Resources\tray.ico" />
+    <!-- Change App.xaml Build Action to Page so we can supply our own Main() -->
+    <ApplicationDefinition Remove="App.xaml" />
+    <Page Include="App.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Velopack" Version="0.0.*" />
+  </ItemGroup>
+</Project>

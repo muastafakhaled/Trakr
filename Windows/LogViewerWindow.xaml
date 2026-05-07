@@ -1,0 +1,137 @@
+<Window x:Class="JiraTimeTracker.Windows.LogViewerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Background="#0d1117" Foreground="#e6edf3" FontFamily="Segoe UI" FontSize="13"
+        Title="Log Viewer" Width="820" Height="560"
+        WindowStartupLocation="CenterScreen"
+        Closing="Window_Closing">
+
+  <Grid Margin="16">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <!-- Title row -->
+    <Grid Grid.Row="0" Margin="0,0,0,12">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="Auto"/>
+      </Grid.ColumnDefinitions>
+      <TextBlock Grid.Column="0" Text="Log Viewer" FontSize="17" FontWeight="SemiBold"
+                 Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
+      <StackPanel Grid.Column="1" Orientation="Horizontal">
+        <CheckBox x:Name="AutoScrollCheck" Content="Auto-scroll" IsChecked="True"
+                  Foreground="{StaticResource SubtextBrush}" FontSize="12"
+                  VerticalAlignment="Center" Margin="0,0,16,0"/>
+        <Button Content="Export…" Style="{StaticResource GhostBtn}"
+                Padding="12,6" Margin="0,0,8,0" Click="Export_Click"/>
+        <Button Content="Clear" Style="{StaticResource GhostBtn}"
+                Padding="12,6" Click="Clear_Click"/>
+      </StackPanel>
+    </Grid>
+
+    <!-- Filters -->
+    <Grid Grid.Row="1" Margin="0,0,0,10">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="10"/>
+        <ColumnDefinition Width="130"/>
+        <ColumnDefinition Width="10"/>
+        <ColumnDefinition Width="140"/>
+      </Grid.ColumnDefinitions>
+
+      <!-- Search -->
+      <Grid Grid.Column="0">
+        <TextBox x:Name="SearchBox" Style="{StaticResource DarkInput}"/>
+        <TextBlock Text="🔍  Filter messages…" IsHitTestVisible="False"
+                   Foreground="#484f58" FontSize="12" Margin="12,0,0,0"
+                   VerticalAlignment="Center">
+          <TextBlock.Style>
+            <Style TargetType="TextBlock">
+              <Setter Property="Visibility" Value="Collapsed"/>
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding Text, ElementName=SearchBox}" Value="">
+                  <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </TextBlock.Style>
+        </TextBlock>
+      </Grid>
+
+      <!-- Level filter -->
+      <ComboBox Grid.Column="2" x:Name="LevelCombo" Style="{StaticResource DarkCombo}">
+        <ComboBoxItem Content="All levels"/>
+        <ComboBoxItem Content="Info +"/>
+        <ComboBoxItem Content="Warning +"/>
+        <ComboBoxItem Content="Errors only"/>
+      </ComboBox>
+
+      <!-- Category filter -->
+      <ComboBox Grid.Column="4" x:Name="CategoryCombo" Style="{StaticResource DarkCombo}"/>
+    </Grid>
+
+    <!-- Log entries -->
+    <Border Grid.Row="2" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+            CornerRadius="6">
+      <ScrollViewer x:Name="Scroller" VerticalScrollBarVisibility="Auto"
+                    Background="#0d1117">
+        <ItemsControl x:Name="LogList" Margin="0">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <!-- LogEntryVM exposes LevelBrush directly — no DataTrigger needed -->
+              <Grid Background="Transparent">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="85"/>
+                  <ColumnDefinition Width="38"/>
+                  <ColumnDefinition Width="90"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="{Binding TimeStr}"
+                           Foreground="#484f58" FontFamily="Consolas" FontSize="11"
+                           Padding="10,5,6,5" VerticalAlignment="Center"/>
+
+                <Border Grid.Column="1" Background="{Binding LevelBrush}"
+                        CornerRadius="3" Margin="0,4,6,4" Padding="4,1">
+                  <TextBlock Text="{Binding LevelTag}" FontFamily="Consolas" FontSize="10"
+                             FontWeight="Bold" Foreground="#0d1117"
+                             HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+
+                <TextBlock Grid.Column="2" Text="{Binding Category}"
+                           Foreground="#58a6ff" FontFamily="Consolas" FontSize="11"
+                           Padding="0,5,10,5" VerticalAlignment="Center"
+                           TextTrimming="CharacterEllipsis"/>
+
+                <TextBlock Grid.Column="3" Text="{Binding Message}"
+                           Foreground="{Binding LevelBrush}"
+                           FontFamily="Consolas" FontSize="11"
+                           Padding="0,5,10,5" VerticalAlignment="Center"
+                           TextWrapping="Wrap"/>
+              </Grid>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </ScrollViewer>
+    </Border>
+
+    <!-- Status bar -->
+    <Grid Grid.Row="3" Margin="0,8,0,0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="Auto"/>
+      </Grid.ColumnDefinitions>
+      <TextBlock x:Name="CountLabel" Grid.Column="0"
+                 Foreground="{StaticResource SubtextBrush}" FontSize="11"
+                 VerticalAlignment="Center"/>
+      <TextBlock x:Name="FileLabel" Grid.Column="1"
+                 Foreground="{StaticResource SubtextBrush}" FontSize="11"
+                 VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
+                 MaxWidth="400" Cursor="Hand" MouseLeftButtonUp="FileLabel_Click"/>
+    </Grid>
+  </Grid>
+</Window>

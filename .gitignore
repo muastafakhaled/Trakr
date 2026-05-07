@@ -1,0 +1,35 @@
+# ── Build output ──────────────────────────────────────────────────────────────
+bin/
+obj/
+publish/
+Releases/
+Setup/Output/
+
+# ── User config & data (contains Jira credentials — never commit) ─────────────
+%AppData%/Trakr/
+config.json
+sessions.csv
+tracker.log
+
+# ── Visual Studio / Rider ─────────────────────────────────────────────────────
+.vs/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.rsuser
+
+# ── OS ────────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── NuGet ─────────────────────────────────────────────────────────────────────
+*.nupkg
+packages/
+
+# ── Secrets (extra safety net) ────────────────────────────────────────────────
+*.env
+secrets.json
+appsettings.*.json

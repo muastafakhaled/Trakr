@@ -1,0 +1,82 @@
+<Window x:Class="JiraTimeTracker.Windows.ManageReposWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Background="#0d1117" Foreground="#e6edf3" FontFamily="Segoe UI" FontSize="13" ResizeMode="NoResize" WindowStartupLocation="CenterScreen"
+        Title="Manage Repo Paths" Width="580" Height="400">
+  <Grid Margin="24">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <TextBlock Grid.Row="0" Text="Repo Scan Paths" FontSize="18" FontWeight="SemiBold"
+               Foreground="{StaticResource TextBrush}" Margin="0,0,0,4"/>
+    <TextBlock Grid.Row="1" Foreground="{StaticResource SubtextBrush}" Margin="0,0,0,16"
+               Text="The tracker scans these folders recursively for git repos with Jira branches."/>
+
+    <Border Grid.Row="2" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+            CornerRadius="8" Margin="0,0,0,16">
+      <ListBox x:Name="PathList" Style="{StaticResource DarkList}" BorderThickness="0"
+               Background="Transparent" SelectionChanged="PathList_SelectionChanged">
+        <ListBox.ItemTemplate>
+          <DataTemplate>
+            <Grid Margin="4,6">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+              </Grid.ColumnDefinitions>
+              <TextBlock Grid.Column="0" x:Name="StatusDot" Text="● " Foreground="{StaticResource GreenBrush}"/>
+              <TextBlock Grid.Column="1" Text="{Binding}" Foreground="{StaticResource TextBrush}"/>
+            </Grid>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+        <ListBox.ItemContainerStyle>
+          <Style TargetType="ListBoxItem">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Style.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="#21262d"/>
+              </Trigger>
+              <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="#1f3258"/>
+              </Trigger>
+            </Style.Triggers>
+          </Style>
+        </ListBox.ItemContainerStyle>
+      </ListBox>
+    </Border>
+
+    <!-- Add Row -->
+    <Grid Grid.Row="3" Margin="0,0,0,12">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition Width="Auto"/>
+      </Grid.ColumnDefinitions>
+      <TextBox Grid.Column="0" x:Name="NewPathBox" Style="{StaticResource DarkInput}"
+               Text="" ToolTip="Enter or paste a folder path"/>
+      <Button Grid.Column="2" Content="Browse" Style="{StaticResource GhostBtn}"
+              Click="Browse_Click" Padding="14,7"/>
+      <Button Grid.Column="4" Content="Add Path" Style="{StaticResource PrimaryBtn}"
+              Click="Add_Click" Padding="14,7"/>
+    </Grid>
+
+    <!-- Bottom Buttons -->
+    <Grid Grid.Row="4">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="Auto"/>
+      </Grid.ColumnDefinitions>
+      <Button Grid.Column="0" x:Name="RemoveBtn" Content="Remove Selected"
+              Style="{StaticResource DangerBtn}" IsEnabled="False" Click="Remove_Click"/>
+      <Button Grid.Column="2" Content="Done" Style="{StaticResource PrimaryBtn}" Click="Done_Click"/>
+    </Grid>
+  </Grid>
+</Window>
