@@ -29,6 +29,9 @@ desktop.ini
 *.nupkg
 packages/
 
+# ── Dev scripts (internal, not for repo) ─────────────────────────────────────
+build.ps1
+
 # ── Secrets (extra safety net) ────────────────────────────────────────────────
 *.env
 secrets.json
