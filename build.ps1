@@ -31,7 +31,7 @@ $ErrorActionPreference = "Stop"
 # ── Configuration ──────────────────────────────────────────────────────────────
 $APP_ID      = "Trakr"
 $VERSION     = "1.0.0"           # bump this with each release
-$REPO_URL    = "https://github.com/OWNER/Trakr"   # <─ change this!
+$REPO_URL    = "https://github.com/muastafakhaled/Trakr"
 $PUBLISH_DIR = ".\publish"
 $RELEASES_DIR = ".\Releases"
 

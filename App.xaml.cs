@@ -104,7 +104,7 @@ public partial class App : Application
 
     // ── Auto-update via Velopack + GitHub Releases ────────────────────────────
     // Replace the URL below with your actual GitHub repo URL before publishing.
-    private const string GitHubRepo = "https://github.com/OWNER/Trakr";
+    private const string GitHubRepo = "https://github.com/muastafakhaled/Trakr";
 
     private async Task CheckForUpdatesAsync()
     {
